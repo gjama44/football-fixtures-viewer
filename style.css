@@ -70,3 +70,24 @@ header h1 {
 .fixture.finished .status {
   color: #2e7d32;
 }
+
+#date-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.filter-btn {
+  padding: 6px 14px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.filter-btn.active {
+  background: #222;
+  color: white;
+  border-color: #222;
+}

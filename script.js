@@ -1,25 +1,25 @@
-const API_KEY = 'YOUR_API_KEY_HERE'; // your football-data.org key
-const BASE_URL = 'https://api.football-data.org/v4';
-
 const competitionSelect = document.getElementById('competition-select');
 const fixturesList = document.getElementById('fixtures-list');
 const statusMessage = document.getElementById('status-message');
+const filterButtons = document.querySelectorAll('.filter-btn');
+
+let currentFilter = 'all';
+let currentMatches = [];
 
 async function fetchFixtures(competitionCode) {
   statusMessage.textContent = 'Loading fixtures...';
   fixturesList.innerHTML = '';
 
   try {
-    const response = await fetch(`${BASE_URL}/competitions/${competitionCode}/matches`, {
-      headers: { 'X-Auth-Token': API_KEY }
-    });
+    const response = await fetch(`/.netlify/functions/fixtures?competition=${competitionCode}`);
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
     }
 
     const data = await response.json();
-    renderFixtures(data.matches);
+    currentMatches = data.matches;
+    applyFilterAndRender();
     statusMessage.textContent = '';
 
   } catch (error) {
@@ -28,8 +28,36 @@ async function fetchFixtures(competitionCode) {
   }
 }
 
+function applyFilterAndRender() {
+  const now = new Date();
+  let filtered = currentMatches;
+
+  if (currentFilter === 'today') {
+    filtered = currentMatches.filter(match => {
+      const matchDate = new Date(match.utcDate);
+      return matchDate.toDateString() === now.toDateString();
+    });
+  } else if (currentFilter === 'week') {
+    const oneWeekFromNow = new Date();
+    oneWeekFromNow.setDate(now.getDate() + 7);
+    filtered = currentMatches.filter(match => {
+      const matchDate = new Date(match.utcDate);
+      return matchDate >= now && matchDate <= oneWeekFromNow;
+    });
+  }
+
+  renderFixtures(filtered);
+}
+
 function renderFixtures(matches) {
   fixturesList.innerHTML = '';
+
+  if (matches.length === 0) {
+    statusMessage.textContent = 'No fixtures found for this filter.';
+    return;
+  } else {
+    statusMessage.textContent = '';
+  }
 
   matches.slice(0, 20).forEach(match => {
     const li = document.createElement('li');
@@ -74,6 +102,15 @@ function renderFixtures(matches) {
 
 competitionSelect.addEventListener('change', (e) => {
   fetchFixtures(e.target.value);
+});
+
+filterButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    filterButtons.forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+    currentFilter = button.dataset.filter;
+    applyFilterAndRender();
+  });
 });
 
 fetchFixtures(competitionSelect.value);
