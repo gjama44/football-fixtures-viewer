@@ -2,7 +2,7 @@
 
 A clean, responsive web app for viewing football fixtures and results across major competitions, built using the football-data.org API.
 
-🔗 **Live demo**: [https://majestic-truffle-7325c5.netlify.app/]
+🔗 **Live demo**: https://footballfixtureslivescores.netlify.app/ 
 
 ## Features
 
